@@ -17,6 +17,7 @@ private:
     std::atomic<long long> allThreadToken;
     std::shared_ptr<Matrix> p2Input;
     std::shared_ptr<Matrix> p2Output;
+    std::chrono::steady_clock::time_point start_;
     void initNegAndUniTable(Dictionary* p2Dict);
     long long pickSecOutId(int lB, int rB, int seed, int lineIndex,int shift, std::vector<long long>& line);
     void saveVec(Dictionary* p2Dict,Args* p2Args);

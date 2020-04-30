@@ -162,6 +162,7 @@ void SecVec::train(Dictionary *p2Dict, Args *p2Args) {
     process = 0.0;
     // use lambda expressions to excute each thread,
     // while the root thread can still get contact to each thread's variable
+    start_ = std::chrono::steady_clock::now();
     for (int i = 0; i < p2Args->thread; i++) {
         threads.push_back(std::thread([=](){eachThread(i,p2Dict,p2Args);}));
     }
@@ -239,11 +240,25 @@ void SecVec::printInfo(double progress,
         double tmplossFirst,
         double tmplossSecond,
         std::ostream& log_stream) {
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    double t =
+            std::chrono::duration_cast<std::chrono::duration<double>>(end - start_)
+                    .count();
+    double wst = 0; int64_t eta = 2592000; // Default to one month in seconds (720 * 3600)
+    progress = progress * 100;
+    eta = t * (100 - progress) / progress;
+    wst = double(allThreadToken) / t;
+    int32_t etah = eta / 3600;
+    int32_t etam = (eta % 3600) / 60;
+
     log_stream << std::fixed;
     log_stream << "Progress: ";
-    log_stream << std::setprecision(1) << std::setw(3) << progress * 100 << "%";
+    log_stream << std::setprecision(1) << std::setw(3) << progress << "%";
     log_stream << " lossFirst: " << std::setw(6) << std::setprecision(5) << tmplossFirst;
     log_stream << " lossSecond: " << std::setw(7) << std::setprecision(5) << tmplossSecond;
+    log_stream << " words/sec/total: " << std::setw(3) << int64_t(wst);
+    log_stream << " ETA: " << std::setw(1) << etah;
+    log_stream << "h" << std::setw(2) << etam << "m";
     log_stream << std::flush;
 }
 
