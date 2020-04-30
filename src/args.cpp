@@ -65,7 +65,7 @@ bool Args::parseArgs(int argc, const std::vector<std::string> &args) {
                 loss = std::string(args.at(ai + 1));
             } else if (args[ai] == "-IfSaveVocab") {
                 ifSaveVocab = std::stoi(args.at(ai + 1));
-            } else if (args[ai] == "-corpusSplitThread") {
+            } else if (args[ai] == "-thread") {
                 thread = std::stoi(args.at(ai + 1));
             } else if (args[ai] == "-minCount") {
                 minCount = std::stoi(args.at(ai + 1));
