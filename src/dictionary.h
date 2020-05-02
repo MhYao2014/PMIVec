@@ -1,88 +1,71 @@
-//
-// Created by mhyao on 2020/2/25.
-//
-#ifndef ASSVEC_ADMM_MPI_DICTIONARY_H
-#define ASSVEC_ADMM_MPI_DICTIONARY_H
+/**
+ * Copyright (c) 2016-present, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-#define TSIZE 1048576
-#define SEED 1159241
-#define MaxWordLen 1000
-#define HASHFN hashValue
+#pragma once
 
-#include <iostream>
-#include <stdlib.h>
+#include <istream>
 #include <memory>
+#include <ostream>
+#include <random>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "args.h"
-//#include "FileToWriteSync.h"
+#include "real.h"
 
-typedef struct VocabHashWithId{
-    char *Word;
-    long long Count;
-    long long id;
-    struct VocabHashWithId *next;
-} HASHUNITID;
+namespace fasttext {
 
-typedef struct VocabUnit {
-    char * Word;
-    long long Count;
-} ARRAYUNIT;
+typedef int32_t id_type;
+enum class entry_type : int8_t { word = 0, label = 1 };
 
-typedef struct FileGroup {
-    long long TotalSize;
-    std::vector<long long> FileNames;
-    long long FileNum;
-} GSIZE;
-
-typedef struct FileSizeUnit {
-    long long FileSize;
-    long long FileName;
-} FSIZE;
-
-class Dictionary {
-private:
-    std::string _corpus_path;
-    long long _min_count;
-    long long _max_vocab;
-    int _if_save_vocab;
-    long long _real_vocab_size;
-    unsigned int hashValue(char *word, int tsize, unsigned int seed);
-    void hashMapWord(char *Word);
-    int getWord(FILE *corpusFile, char *word);
-    long long hashToArray(long long vocabSize);
-    void cutVocab(long long vocabSize);
-    void fillIdToVocabHash();
-    long long getWordId(char *Word);
-    long long hashSearch(char *Word);
-    //    long long hashToArray(HASHUNITID **vocabHash, ARRAYUNIT * vocabArray, long long vocabSize);
-    //    void cutVocab(ARRAYUNIT* vocabArray, long long vocabSize);
-    //    void hashMapWord(char *Word, HASHUNITID **VocabHash);
-    //    void fillIdToVocabHash(ARRAYUNIT *vocabArray, HASHUNITID ** vocabHash);
-public:
-    long long _total_tokens;
-    HASHUNITID ** vocabHash;
-    ARRAYUNIT * vocabArray;
-    // todo:修缮splitcorpus成员函数
-    std::vector<GSIZE> groups;
-    explicit Dictionary();
-    ~Dictionary();
-    void setCorpusPath(std::string &corpusPath);
-    void setMinCount(long long minCount);
-    void setMaxVocab(long long maxVocab);
-    void setIfSaveVocab(int ifSaveVocab);
-    void setGroups(std::vector<GSIZE> &Groups);
-    long long getRealVocabSize();
-    void buildVocab();
-    void getLine(FILE * CorpusSplit, std::vector<long long> &line);
-    long long getTotalTokens();
-
-    int getNumInt(FILE *p2File, long long &numInt);
-    int getNumEachLine(FILE * p2File,
-                    long long &numInt,
-                    int NotReadSuccess,
-                    std::vector<long long> &WinSamp);
+struct entry {
+  std::string word;
+  int64_t count;
+  int64_t dictId;
 };
 
-#endif
+class Dictionary {
+ protected:
+  static const int32_t MAX_VOCAB_SIZE = 30000000;
+  static const int32_t MAX_LINE_SIZE = 1024;
+
+  int32_t find(const std::string&) const;
+  int32_t find(const std::string&, uint32_t h) const;
+  void initTableDiscard();
+  void reset(std::istream&) const;
+
+  std::shared_ptr<Args> args_;
+  std::vector<int32_t> word2int_;
+  std::vector<entry> words_;
+
+  std::vector<real> pdiscard_;
+  int32_t size_;
+  int32_t nwords_;
+  int64_t ntokens_;
+
+ public:
+  static const std::string EOS;
+
+  explicit Dictionary(std::shared_ptr<Args>);
+  int32_t nwords() const;
+  int64_t ntokens() const;
+  int32_t getId(const std::string&) const;
+  bool discard(int32_t, real) const;
+  std::string getWord(int32_t) const;
+  uint32_t hash(const std::string& str) const;
+  void add(const std::string&);
+  bool readWord(std::istream&, std::string&) const;
+  void readFromFile(std::istream&);
+  std::vector<int64_t> getCounts(entry_type) const;
+  int32_t getLine(std::istream&, std::vector<int32_t>&, std::minstd_rand&)
+      const;
+  void threshold(int64_t, int64_t);
+};
+
+} // namespace fasttext
