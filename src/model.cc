@@ -32,7 +32,7 @@ namespace fasttext {
         Vector Z(wo_->size(1));
         Z.zero();Z.addVector(state.inputGrad,1.0);
         Z.addVector(state.inputVec,-1.0*projectScale);
-        Z.mul(-1.0 * lr * (1.0+projectScale/state.inputGrad.norm()));
+        Z.mul(-1.0 * lr);
         wi_->addVectorToRow(Z,input,1.0);
         wi_->scalerMulRow(1.0 / wi_->l2NormRow(input), input);
     }
