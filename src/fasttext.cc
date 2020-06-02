@@ -130,10 +130,10 @@ namespace fasttext {
             for (int32_t c = -boundary; c <= boundary; c++) {
                 if (c != 0 && w + c >= 0 && w + c < line.size()) {
                     secC = 0;secSampTime=0;// force sample each time without
-                    do {
-                        secC = secOutIdUniform(state.rng);
-                        secSampTime += 1;if (secSampTime>2) {secC=0; break;}
-                    } while (secC==0 || secC==c || w+secC<0 || w+secC >= line.size());
+//                    do {
+//                        secC = secOutIdUniform(state.rng);
+//                        secSampTime += 1;if (secSampTime>2) {secC=0; break;}
+//                    } while (secC==0 || secC==c || w+secC<0 || w+secC >= line.size());
                     model_->update(inDictId, line, w + c, w+secC, lr, state);
                 }
             }
