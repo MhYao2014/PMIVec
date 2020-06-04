@@ -61,7 +61,7 @@ namespace fasttext {
         real score = sigmoid(inner);
         if (backprop) {
             real alpha = (real(labelIsPositive) - score);
-            state.outputVec.addVector(state.inputVec,-1 * inner);
+//            state.outputVec.addVector(state.inputVec,-1 * inner);
             state.inputGrad.addVector(state.outputVec, -1 * alpha);
             wo_->addVectorToRow(state.inputVec, target, lr * alpha);
         }
@@ -81,7 +81,7 @@ namespace fasttext {
         real score = sigmoid(inner);
         if (backprop) {
             real alpha = (real(labelIsPositive) - score);
-            state.sumOutVec.addVector(state.inputVec, -1 * inner);
+//            state.sumOutVec.addVector(state.inputVec, -1 * inner);
             state.inputGrad.addVector(state.sumOutVec, -1 * alpha);
             wo_->addVectorToRow(state.inputVec, outId, lr * alpha);
             wo_->addVectorToRow(state.inputVec, secOutId, lr * alpha);
